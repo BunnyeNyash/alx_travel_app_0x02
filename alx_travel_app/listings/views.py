@@ -14,6 +14,16 @@ from rest_framework.permissions import IsAuthenticated
 from celery import shared_task
 from django.core.mail import send_mail
 
+
+# Temporary start
+from django.http import HttpResponse
+from django.conf import settings
+
+def test_chapa_key(request):
+    return HttpResponse(f"Chapa Key: {settings.CHAPA_SECRET_KEY}")
+# Temporary end
+
+
 # Create your views here.
 class ListingViewSet(viewsets.ModelViewSet):
     """
