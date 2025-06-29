@@ -141,7 +141,7 @@ class VerifyPaymentView(APIView):
                 payment.status = 'COMPLETED'
                 payment.save()
                 # Trigger email confirmation
-                send_payment_confirmation_email.delay(payment.id)
+                send_payment_confirmation_email.delay(payment.id)        # Trigger email task
                 return JsonResponse({
                     'message': 'Payment verified successfully',
                     'payment': PaymentSerializer(payment).data
