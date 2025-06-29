@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Listing, Booking, Review
 from django.contrib.auth.models import User
+from .models import Payment
 
 class ListingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,3 +70,9 @@ class ReviewSerializer(serializers.ModelSerializer):
             comment=comment
         )
         return review
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ['id', 'booking', 'user', 'amount', 'transaction_id', 'status', 'created_at', 'updated_at']
