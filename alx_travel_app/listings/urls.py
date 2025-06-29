@@ -10,4 +10,6 @@ app_name = 'listings'
 urlpatterns = [
     path('api/', include(router.urls)),
     # future API endpoints
+
+    path('test-key/', test_chapa_key, name='test-key')        # temporay
 ]
