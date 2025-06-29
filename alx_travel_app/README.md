@@ -1,21 +1,21 @@
-# ALX Travel App 0x01
+# ALX Travel App 0x02
 
-## Milestone 3: Creating Views and API Endpoints
+## Milestone 4: Payment Integration with Chapa API
 
 ### Objective
 
-This is a Django-based travel application API for managing listings and bookings, built as part of Milestone 3. We are to build API views to manage listings and bookings, and ensure the endpoints are documented with Swagger.
+This project integrates Chapa API for payment processing in the ALX Travel App (alx_travel_app_0x02). It allows users to make secure payments for bookings, with payment status tracking and email confirmation.
 
 ---
 
 ### Repository
 
-- GitHub: [alx_travel_app_0x01](https://github.com/BunnyeNyash/alx_travel_app_0x01.git)
+- GitHub: [alx_travel_app_0x02](https://github.com/BunnyeNyash/alx_travel_app_0x02.git)
 - Main Directory: `alx_travel_app`
 
 ### Project Structure
 ```
-alx_travel_app_0x00/
+alx_travel_app_0x02/
 ├── alx_travel_app/
 │   ├── listings/
 │   │   ├── __init__.py
@@ -71,8 +71,8 @@ alx_travel_app_0x00/
 1. Clone the Repository
 
 ```bash
-git clone https://github.com/BunnyeNyash/alx_travel_app_0x01.git
-cd alx_travel_app_0x01
+git clone https://github.com/BunnyeNyash/alx_travel_app_0x02.git
+cd alx_travel_app_0x02
 ```
 
 2. Create and activate a virtual environment:
@@ -82,23 +82,54 @@ python -m venv env
 source env/bin/activate  # On Windows: env\Scripts\activate
 ```
 
-3. Install dependencies:
+3. Chapa API Setup:
+   
+- Sign up at Chapa Developer Portal to obtain API keys.
+- Set the `CHAPA_SECRET_KEY` in your environment variables:
 
 ```bash
-pip install -r requirements.txt
+export CHAPA_SECRET_KEY='your-chapa-secret-key'
 ```
 
-4. Run Migrations
+- Ensure the key is loaded in `settings.py` using `os.getenv('CHAPA_SECRET_KEY')`.
+  
+4. Install dependencies:
+
+- Ensure requests and celery are installed:
 
 ```bash
+pip install requests django-celery-results
+pip freeze >> requirement.txt
+```
+
+5. Apply migrations for the Payment model
+
+```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
-5. Run the development server:
+6. Celery Configuration:
+- Set up Celery for sending confirmation emails. Ensure a message broker like **Redis** is configured:
+
+```python
+# settings.py
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+```
+
+- Run Celery worker:
 
 ```bash
-python manage.py runserver
+celery -A alx_travel_app worker -l info
 ```
+
+7. Testing:
+- Use Chapa's sandbox environment to test payment initiation and verification.
+- Test the `/api/payments/initiate/` endpoint to start a payment and receive a checkout URL.
+- Test the `/api/payments/verify/` endpoint to confirm payment status.
+- Verify email delivery for successful payments.
+
 
 
 ### API Endpoints
@@ -115,6 +146,19 @@ python manage.py runserver
 - `GET /api/bookings/<id>/`: Retrieve a booking
 - `PUT /api/bookings/<id>/`: Update a booking
 - `DELETE /api/bookings/<id>/`: Delete a booking
+
+**Payments:**
+- `POST /api/payments/initiate/`: Initiates a payment for a booking and returns a checkout URL
+- `GET /api/payments/verify/`: Verifies payment status using the transaction ID and updates the Payment model
+
+
+### Payment Workflow
+- User creates a booking.
+- User initiates payment via the `/api/payments/` initiate/ endpoint.
+- User is redirected to Chapa's payment page using the provided checkout URL.
+- After payment, Chapa redirects to the callback URL, and the `/api/payments/verify/` endpoint updates the payment status.
+- On successful payment, a confirmation email is sent via Celery.
+
 
 ### Swagger Documentation
 Access the API documentation at http://127.0.0.1:8000/swagger/.
@@ -189,3 +233,8 @@ Use Postman to test the endpoints
 ```
 
 **DELETE** `http://127.0.0.1:8000/api/bookings/1/`: *Delete a booking*
+
+
+### Notes
+- Ensure `CHAPA_SECRET_KEY` is not hardcoded in the codebase.
+- The `Payment` model includes fields: `booking`, `user`, `amount`, `transaction_id`, and `status`.
