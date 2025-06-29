@@ -27,6 +27,7 @@ from django.urls import path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+from listings.views import InitiatePaymentView
 
 
 # Setting up Swagger with project metadata
@@ -48,4 +49,5 @@ urlpatterns = [
     path('api/', include('listings.urls')), # Routes to listings/urls.py
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),        # Routes to Swagger UI
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),                 # Routes to ReDoc UI
+    path('api/payments/initiate/', InitiatePaymentView.as_view(), name='initiate-payment'),
 ]
